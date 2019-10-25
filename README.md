@@ -1,69 +1,88 @@
-# Visual Studio Code - Open Source ("Code - OSS")
+Golint is a linter for Go source code.
 
-<!-- [![Build Status](https://dev.azure.com/vscode/VSCode/_apis/build/status/VS%20Code?branchName=master)](https://aka.ms/vscode-builds) -->
-[![Build Status](https://dev.azure.com/vscode/VSCode/_apis/build/status/VS%20Code?branchName=master)](https://dev.azure.com/vscode/VSCode/_build/latest?definitionId=12)
-[![Feature Requests](https://img.shields.io/github/issues/Microsoft/vscode/feature-request.svg)](https://github.com/Microsoft/vscode/issues?q=is%3Aopen+is%3Aissue+label%3Afeature-request+sort%3Areactions-%2B1-desc)
-[![Bugs](https://img.shields.io/github/issues/Microsoft/vscode/bug.svg)](https://github.com/Microsoft/vscode/issues?utf8=✓&q=is%3Aissue+is%3Aopen+label%3Abug)
-[![Gitter](https://img.shields.io/badge/chat-on%20gitter-yellow.svg)](https://gitter.im/Microsoft/vscode)
+[![Build Status](https://travis-ci.org/golang/lint.svg?branch=master)](https://travis-ci.org/golang/lint)
 
-## The Repository
+## Installation
 
-This repository ("`Code - OSS`") is where we (Microsoft) develop the [Visual Studio Code](https://code.visualstudio.com) product. Not only do we work on code and issues here, we also publish our [roadmap](https://github.com/microsoft/vscode/wiki/Roadmap), [monthly iteration plans](https://github.com/microsoft/vscode/wiki/Iteration-Plans), and our [endgame plans](https://github.com/microsoft/vscode/wiki/Running-the-Endgame). This source code is available to everyone under the standard [MIT license](https://github.com/microsoft/vscode/blob/master/LICENSE.txt).
+Golint requires a
+[supported release of Go](https://golang.org/doc/devel/release.html#policy).
 
-## Visual Studio Code
+    go get -u golang.org/x/lint/golint
 
-<p align="center">
-  <img alt="VS Code in action" src="https://user-images.githubusercontent.com/1487073/58344409-70473b80-7e0a-11e9-8570-b2efc6f8fa44.png">
-</p>
+To find out where `golint` was installed you can run `go list -f {{.Target}} golang.org/x/lint/golint`. For `golint` to be used globally add that directory to the `$PATH` environment setting.
 
-[Visual Studio Code](https://code.visualstudio.com) is a distribution of the `Code - OSS` repository with Microsoft specific customizations released under a traditional [Microsoft product license](https://code.visualstudio.com/License/).
+## Usage
 
-[Visual Studio Code](https://code.visualstudio.com) combines the simplicity of a code editor with what developers need for their core edit-build-debug cycle. It provides comprehensive code editing, navigation, and understanding support along with lightweight debugging, a rich extensibility model, and lightweight integration with existing tools.
+Invoke `golint` with one or more filenames, directories, or packages named
+by its import path. Golint uses the same
+[import path syntax](https://golang.org/cmd/go/#hdr-Import_path_syntax) as
+the `go` command and therefore
+also supports relative import paths like `./...`. Additionally the `...`
+wildcard can be used as suffix on relative and absolute file paths to recurse
+into them.
 
-Visual Studio Code is updated monthly with new features and bug fixes. You can download it for Windows, macOS, and Linux on [Visual Studio Code's website](https://code.visualstudio.com/Download). To get the latest releases every day, install the [Insiders build](https://code.visualstudio.com/insiders).
+The output of this tool is a list of suggestions in Vim quickfix format,
+which is accepted by lots of different editors.
+
+## Purpose
+
+Golint differs from gofmt. Gofmt reformats Go source code, whereas
+golint prints out style mistakes.
+
+Golint differs from govet. Govet is concerned with correctness, whereas
+golint is concerned with coding style. Golint is in use at Google, and it
+seeks to match the accepted style of the open source Go project.
+
+The suggestions made by golint are exactly that: suggestions.
+Golint is not perfect, and has both false positives and false negatives.
+Do not treat its output as a gold standard. We will not be adding pragmas
+or other knobs to suppress specific warnings, so do not expect or require
+code to be completely "lint-free".
+In short, this tool is not, and will never be, trustworthy enough for its
+suggestions to be enforced automatically, for example as part of a build process.
+Golint makes suggestions for many of the mechanically checkable items listed in
+[Effective Go](https://golang.org/doc/effective_go.html) and the
+[CodeReviewComments wiki page](https://golang.org/wiki/CodeReviewComments).
+
+## Scope
+
+Golint is meant to carry out the stylistic conventions put forth in
+[Effective Go](https://golang.org/doc/effective_go.html) and
+[CodeReviewComments](https://golang.org/wiki/CodeReviewComments).
+Changes that are not aligned with those documents will not be considered.
+
+## Contributions
+
+Contributions to this project are welcome provided they are [in scope](#scope),
+though please send mail before starting work on anything major.
+Contributors retain their copyright, so we need you to fill out
+[a short form](https://developers.google.com/open-source/cla/individual)
+before we can accept your contribution.
+
+## Vim
+
+Add this to your ~/.vimrc:
+
+    set rtp+=$GOPATH/src/golang.org/x/lint/misc/vim
+
+If you have multiple entries in your GOPATH, replace `$GOPATH` with the right value.
+
+Running `:Lint` will run golint on the current file and populate the quickfix list.
+
+Optionally, add this to your `~/.vimrc` to automatically run `golint` on `:w`
+
+    autocmd BufWritePost,FileWritePost *.go execute 'Lint' | cwindow
 
 
+## Emacs
 
-## Contributing
+Add this to your `.emacs` file:
 
-There are many ways in which you can participate in the project, for example:
+    (add-to-list 'load-path (concat (getenv "GOPATH")  "/src/golang.org/x/lint/misc/emacs/"))
+    (require 'golint)
 
-* [Submit bugs and feature requests](https://github.com/microsoft/vscode/issues), and help us verify as they are checked in
-* Review [source code changes](https://github.com/microsoft/vscode/pulls)
-* Review the [documentation](https://github.com/microsoft/vscode-docs) and make pull requests for anything from typos to new content
+If you have multiple entries in your GOPATH, replace `$GOPATH` with the right value.
 
-If you are interested in fixing issues and contributing directly to the code base,
-please see the document [How to Contribute](https://github.com/Microsoft/vscode/wiki/How-to-Contribute), which covers the following:
+Running M-x golint will run golint on the current file.
 
-* [How to build and run from source](https://github.com/Microsoft/vscode/wiki/How-to-Contribute#build-and-run)
-* [The development workflow, including debugging and running tests](https://github.com/Microsoft/vscode/wiki/How-to-Contribute#debugging)
-* [Coding guidelines](https://github.com/Microsoft/vscode/wiki/Coding-Guidelines)
-* [Submitting pull requests](https://github.com/Microsoft/vscode/wiki/How-to-Contribute#pull-requests)
-* [Finding an issue to work on](https://github.com/microsoft/vscode/wiki/How-to-Contribute#where-to-contribute)
-* [Contributing to translations](https://aka.ms/vscodeloc)
-
-## Feedback
-
-* Ask a question on [Stack Overflow](https://stackoverflow.com/questions/tagged/vscode)
-* [Request a new feature](CONTRIBUTING.md)
-* Up vote [popular feature requests](https://github.com/Microsoft/vscode/issues?q=is%3Aopen+is%3Aissue+label%3Afeature-request+sort%3Areactions-%2B1-desc)
-* [File an issue](https://github.com/Microsoft/vscode/issues)
-* Follow [@code](https://twitter.com/code) and let us know what you think!
-
-## Related Projects
-
-Many of the core components and extensions to Code live in their own repositories on GitHub. For example, the [node debug adapter](https://github.com/microsoft/vscode-node-debug) and the [mono debug adapter](https://github.com/microsoft/vscode-mono-debug) have their own repositories. For a complete list, please visit the [Related Projects](https://github.com/Microsoft/vscode/wiki/Related-Projects) page on our [wiki](https://github.com/Microsoft/vscode/wiki).
-
-## Bundled Extensions
-
-Code includes a set of built-in extensions located in the [extensions](extensions) folder, including grammars and snippets for many languages. Extensions that provide rich language support (code completion, Go to Definition) for a language have the suffix `language-features`. For example, the `json` extension provides coloring for `JSON` and the `json-language-features` provides rich language support for `JSON`.
-
-## Code of Conduct
-
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
-
-## License
-
-Copyright (c) Microsoft Corporation. All rights reserved.
-
-Licensed under the [MIT](LICENSE.txt) license.
+For more usage, see [Compilation-Mode](http://www.gnu.org/software/emacs/manual/html_node/emacs/Compilation-Mode.html).
